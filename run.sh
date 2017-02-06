@@ -9,9 +9,10 @@ fail() {
   exit 1
 }
 
+# use UTC for timestamps
 datecmd() {
   # shellcheck disable=SC2068
-  date $@
+  date --utc $@
 }
 
 declare -A req_vars
