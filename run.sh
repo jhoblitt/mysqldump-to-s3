@@ -43,7 +43,12 @@ MYSQLDUMP_ARGS+=(
   $MYSQLDUMP_OPTIONS
   $MYSQLDUMP_DATABASE
 )
-S3_OBJECT="s3://$AWS_BUCKET/$PREFIX/$(datecmd +"%Y")/$(datecmd +"%m")/$(datecmd +"%d").sql.gz"
+YEAR=$(datecmd +"%Y")
+MON=$(datecmd +"%m")
+DAY=$(datecmd +"%d")
+# date --utc --iso-8601=seconds uses the uglier +00:00 instead of Z
+ISO8601=$(datecmd +"%Y-%m-%dT%H:%M:%SZ")
+S3_OBJECT="s3://${AWS_BUCKET}/${PREFIX}/${YEAR}/${MON}/${DAY}/${ISO8601}.sql.gz"
 
 echo "Starting dump of ${MYSQLDUMP_DATABASE} database(s) from ${MYSQL_PORT_3306_TCP_ADDR}..."
 
