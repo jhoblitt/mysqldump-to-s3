@@ -9,6 +9,11 @@ fail() {
   exit 1
 }
 
+datecmd() {
+  # shellcheck disable=SC2068
+  date $@
+}
+
 declare -A req_vars
 req_vars=(
   [AWS_ACCESS_KEY_ID]='You need to set the AWS_ACCESS_KEY_ID environment variable.'
@@ -37,7 +42,7 @@ MYSQLDUMP_ARGS+=(
   $MYSQLDUMP_OPTIONS
   $MYSQLDUMP_DATABASE
 )
-S3_OBJECT="s3://$AWS_BUCKET/$PREFIX/$(date +"%Y")/$(date +"%m")/$(date +"%d").sql.gz"
+S3_OBJECT="s3://$AWS_BUCKET/$PREFIX/$(datecmd +"%Y")/$(datecmd +"%m")/$(datecmd +"%d").sql.gz"
 
 echo "Starting dump of ${MYSQLDUMP_DATABASE} database(s) from ${MYSQL_PORT_3306_TCP_ADDR}..."
 
