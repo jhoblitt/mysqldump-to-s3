@@ -3,45 +3,31 @@
 set -e
 set -o pipefail
 
-if [ "${AWS_ACCESS_KEY_ID}" = "**None**" ]; then
-  echo "You need to set the AWS_ACCESS_KEY_ID environment variable."
+fail() {
+  # shellcheck disable=SC2068
+  echo -e $@
   exit 1
-fi
+}
 
-if [ "${AWS_SECRET_ACCESS_KEY}" = "**None**" ]; then
-  echo "You need to set the AWS_SECRET_ACCESS_KEY environment variable."
-  exit 1
-fi
+declare -A req_vars
+req_vars=(
+  [AWS_ACCESS_KEY_ID]='You need to set the AWS_ACCESS_KEY_ID environment variable.'
+  [AWS_SECRET_ACCESS_KEY]='You need to set the AWS_SECRET_ACCESS_KEY environment variable.'
+  [AWS_BUCKET]='You need to set the AWS_BUCKET environment variable.'
+  [PREFIX]='You need to set the PREFIX environment variable.'
+  [MYSQL_ENV_MYSQL_USER]='You need to set the MYSQL_ENV_MYSQL_USER environment variable.'
+  [MYSQL_ENV_MYSQL_PASSWORD]='You need to set the MYSQL_ENV_MYSQL_PASSWORD environment variable.'
+  [MYSQL_PORT_3306_TCP_ADDR]='You need to set the MYSQL_PORT_3306_TCP_ADDR environment variable or link to a container named MYSQL.'
+  [MYSQL_PORT_3306_TCP_PORT]='You need to set the MYSQL_PORT_3306_TCP_PORT environment variable or link to a container named MYSQL.'
+)
 
-if [ "${AWS_BUCKET}" = "**None**" ]; then
-  echo "You need to set the AWS_BUCKET environment variable."
-  exit 1
-fi
+for k in "${!req_vars[@]}"; do
+  eval "[[ -z \"\$$k\" ]]" && fail "${req_vars[$k]}"
+done
 
-if [ "${PREFIX}" = "**None**" ]; then
-  echo "You need to set the PREFIX environment variable."
-  exit 1
-fi
+MYSQLDUMP_OPTIONS=${MYSQLDUMP_OPTIONS:-"--quote-names --quick --add-drop-table --add-locks --allow-keywords --disable-keys --extended-insert --single-transaction --create-options --comments --net_buffer_length=16384"}
+MYSQLDUMP_DATABASE=${MYSQLDUMP_DATABASE:-"--all-databases"}
 
-if [ -z "${MYSQL_ENV_MYSQL_USER}" ]; then
-  echo "You need to set the MYSQL_ENV_MYSQL_USER environment variable."
-  exit 1
-fi
-
-if [ -z "${MYSQL_ENV_MYSQL_PASSWORD}" ]; then
-  echo "You need to set the MYSQL_ENV_MYSQL_PASSWORD environment variable."
-  exit 1
-fi
-
-if [ -z "${MYSQL_PORT_3306_TCP_ADDR}" ]; then
-  echo "You need to set the MYSQL_PORT_3306_TCP_ADDR environment variable or link to a container named MYSQL."
-  exit 1
-fi
-
-if [ -z "${MYSQL_PORT_3306_TCP_PORT}" ]; then
-  echo "You need to set the MYSQL_PORT_3306_TCP_PORT environment variable or link to a container named MYSQL."
-  exit 1
-fi
 
 MYSQL_HOST_OPTS="-h $MYSQL_PORT_3306_TCP_ADDR --port $MYSQL_PORT_3306_TCP_PORT -u $MYSQL_ENV_MYSQL_USER -p$MYSQL_ENV_MYSQL_PASSWORD"
 
