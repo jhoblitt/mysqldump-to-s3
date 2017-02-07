@@ -71,6 +71,10 @@ echo "Starting dump of ${MYSQLDUMP_DATABASE} database(s) from ${MYSQL_PORT_3306_
 
 mysqldump "${MYSQLDUMP_ARGS[@]}" | gzip | aws s3 cp - "$S3_OBJECT"
 
+echo "Dumped to ${S3_OBJECT}..."
+
+aws s3 ls --human-readable "$S3_OBJECT"
+
 echo "Done!"
 
 exit 0
