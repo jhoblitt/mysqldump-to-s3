@@ -28,12 +28,20 @@ done
 MYSQLDUMP_OPTIONS=${MYSQLDUMP_OPTIONS:-"--quote-names --quick --add-drop-table --add-locks --allow-keywords --disable-keys --extended-insert --single-transaction --create-options --comments --net_buffer_length=16384"}
 MYSQLDUMP_DATABASE=${MYSQLDUMP_DATABASE:-"--all-databases"}
 
-
-MYSQL_HOST_OPTS="-h $MYSQL_PORT_3306_TCP_ADDR --port $MYSQL_PORT_3306_TCP_PORT -u $MYSQL_ENV_MYSQL_USER -p$MYSQL_ENV_MYSQL_PASSWORD"
+declare -a MYSQLDUMP_ARGS
+MYSQLDUMP_ARGS+=(
+  -h "$MYSQL_PORT_3306_TCP_ADDR"
+  --port "$MYSQL_PORT_3306_TCP_PORT"
+  -u "$MYSQL_ENV_MYSQL_USER"
+  -p"$MYSQL_ENV_MYSQL_PASSWORD"
+  $MYSQLDUMP_OPTIONS
+  $MYSQLDUMP_DATABASE
+)
+S3_OBJECT="s3://$AWS_BUCKET/$PREFIX/$(date +"%Y")/$(date +"%m")/$(date +"%d").sql.gz"
 
 echo "Starting dump of ${MYSQLDUMP_DATABASE} database(s) from ${MYSQL_PORT_3306_TCP_ADDR}..."
 
-mysqldump $MYSQL_HOST_OPTS $MYSQLDUMP_OPTIONS $MYSQLDUMP_DATABASE | gzip | aws s3 cp - s3://$AWS_BUCKET/$PREFIX/$(date +"%Y")/$(date +"%m")/$(date +"%d").sql.gz
+mysqldump "${MYSQLDUMP_ARGS[@]}" | gzip | aws s3 cp - "$S3_OBJECT"
 
 echo "Done!"
 
