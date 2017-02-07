@@ -43,12 +43,22 @@ MYSQLDUMP_ARGS+=(
   $MYSQLDUMP_OPTIONS
   $MYSQLDUMP_DATABASE
 )
-YEAR=$(datecmd +"%Y")
-MON=$(datecmd +"%m")
-DAY=$(datecmd +"%d")
-# date --utc --iso-8601=seconds uses the uglier +00:00 instead of Z
-ISO8601=$(datecmd +"%Y-%m-%dT%H:%M:%SZ")
-S3_OBJECT="s3://${AWS_BUCKET}/${PREFIX}/${YEAR}/${MON}/${DAY}/${ISO8601}.sql.gz"
+
+# If set, DUMP_NAME will override the default s3 "filename" and "path"
+# construction.  However, ".sql.gz" will still be appended to the object name.
+# This is intended to enable easy creation of "convenience" dumps. E.g.
+#     "s3://{$AWS_BUCKET}/${PREFIX}/latest.sql.gz"
+declare S3_OBJECT
+if [[ -n ${DUMP_NAME+x} ]]; then
+    S3_OBJECT="s3://{$AWS_BUCKET}/${PREFIX}/${DUMP_NAME}.sql.gz"
+else
+  year=$(datecmd +"%Y")
+  mon=$(datecmd +"%m")
+  day=$(datecmd +"%d")
+  # date --utc --iso-8601=seconds uses the uglier +00:00 instead of Z
+  iso8601=$(datecmd +"%Y-%m-%dT%H:%M:%SZ")
+  S3_OBJECT="s3://${AWS_BUCKET}/${PREFIX}/${year}/${mon}/${day}/${iso8601}.sql.gz"
+fi
 
 echo "Starting dump of ${MYSQLDUMP_DATABASE} database(s) from ${MYSQL_PORT_3306_TCP_ADDR}..."
 
