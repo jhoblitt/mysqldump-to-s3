@@ -51,7 +51,7 @@ S3_BUCKET="s3://${AWS_BUCKET}"
 # This is intended to enable easy creation of "convenience" dumps. E.g.
 #     "s3://{$AWS_BUCKET}/${PREFIX}/latest.sql.gz"
 declare S3_OBJECT
-if [[ -n ${DUMP_NAME+x} ]]; then
+if [[ -n $DUMP_NAME ]]; then
     S3_OBJECT="${S3_BUCKET}/${PREFIX}/${DUMP_NAME}.sql.gz"
 else
   year=$(datecmd +"%Y")
