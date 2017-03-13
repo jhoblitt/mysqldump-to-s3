@@ -31,7 +31,7 @@ for k in "${!req_vars[@]}"; do
   eval "[[ -z \"\$$k\" ]]" && fail "${req_vars[$k]}"
 done
 
-MYSQLDUMP_OPTIONS=${MYSQLDUMP_OPTIONS:-"--quote-names --quick --add-drop-table --add-locks --allow-keywords --disable-keys --extended-insert --single-transaction --create-options --comments --net_buffer_length=16384"}
+MYSQLDUMP_OPTIONS=${MYSQLDUMP_OPTIONS:-"--quote-names --quick --add-drop-table --add-locks --allow-keywords --disable-keys --extended-insert --single-transaction --create-options --comments --net_buffer_length=16384 --max_allowed_packet=1024M"}
 MYSQLDUMP_DATABASE=${MYSQLDUMP_DATABASE:-"--all-databases"}
 
 declare -a MYSQLDUMP_ARGS
